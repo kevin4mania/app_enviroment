@@ -1,5 +1,5 @@
 const { Schema, model } = require("mongoose");
-let App = model("App");
+// let App = model("App");
 
 const app_rutaSchema = new Schema({
   id_APP: {

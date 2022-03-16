@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
-// TODO poner un campo "TIPO" para identificar si es una ruta de produccion o desarrollo
+// let PerfilRuta = model("PerfilRuta");
+
 const RutasSchema = new Schema({
   nombre: {
     type: String,
@@ -7,6 +8,11 @@ const RutasSchema = new Schema({
   },
   valor: {
     type: String,
+    require: true,
+  },
+  tipo: {
+    type: Schema.ObjectId,
+    ref: "PerfilRuta",
     require: true,
   },
 });

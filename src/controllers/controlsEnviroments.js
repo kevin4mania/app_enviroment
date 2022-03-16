@@ -3,8 +3,9 @@ const { response } = require("express");
 const Ruta = require("../models/rutas");
 const App = require("../models/app");
 const App_Ruta = require("../models/app-ruta");
-const app = require("../models/app");
+const Perfil_ruta = require("../models/perfil-ruta");
 
+const { Types } = require("mongoose");
 /**
  * AGREGAR NUEVAS
  */
@@ -29,7 +30,6 @@ const nuevaENV = async (req, res = response) => {
     });
   } catch (error) {
     if (error) {
-      console.log(err);
       res.status(500).json({
         ok: false,
         msg: "Hable con el administrador",
@@ -57,7 +57,6 @@ const nuevaAPP = async (req, res = response) => {
     });
   } catch (error) {
     if (error) {
-      console.log(err);
       res.status(500).json({
         ok: false,
         msg: "Hable con el administrador",
@@ -85,7 +84,33 @@ const nuevaApp_Ruta = async (req, res = response) => {
     });
   } catch (error) {
     if (error) {
-      console.log(err);
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+      });
+    }
+  }
+};
+
+//agregar nuevo perfil de ruta
+const nuevoPerfil_ruta = async (req, res = response) => {
+  console.log("REQUEST: ", req.body);
+  try {
+    const perfil_ruta = new Perfil_ruta(req.body);
+    await perfil_ruta.save((errBD) => {
+      if (errBD) {
+        return res.status(400).json({
+          ok: false,
+          msg: "Error en la BD (Mongo) no se pudo guardar el perfil ruta",
+        });
+      }
+    });
+    res.json({
+      ok: true,
+      perfil_ruta,
+    });
+  } catch (error) {
+    if (error) {
       res.status(500).json({
         ok: false,
         msg: "Hable con el administrador",
@@ -99,7 +124,7 @@ const nuevaApp_Ruta = async (req, res = response) => {
  */
 //desplegar todas las app
 const consultaAPPs = async (req, res = response) => {
-  console.log("REQUEST: ", req.body);
+  // console.log("REQUEST: ", req.body);
   try {
     const apps = await App.find();
     if (!apps) {
@@ -114,7 +139,6 @@ const consultaAPPs = async (req, res = response) => {
     });
   } catch (error) {
     if (error) {
-      console.log(err);
       res.status(500).json({
         ok: false,
         msg: "Hable con el administrador",
@@ -122,7 +146,7 @@ const consultaAPPs = async (req, res = response) => {
     }
   }
 };
-
+//desplegar todas las rutas
 const consultaRutas = async (req, res = response) => {
   console.log("REQUEST: ", req.body);
   try {
@@ -139,10 +163,145 @@ const consultaRutas = async (req, res = response) => {
     });
   } catch (error) {
     if (error) {
-      console.log(err);
       res.status(500).json({
         ok: false,
         msg: "Hable con el administrador",
+      });
+    }
+  }
+};
+//desplegar todos los perfiles de rutas
+const consultaPerfil_rutas = async (req, res = response) => {
+  console.log("REQUEST: ", req.body);
+  try {
+    const perfil_rutas = await Perfil_ruta.find();
+    if (!perfil_rutas) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron perfiles rutas guardadas",
+      });
+    }
+    res.json({
+      ok: true,
+      perfil_rutas,
+    });
+  } catch (error) {
+    if (error) {
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+      });
+    }
+  }
+};
+
+//desplegar rutas por tipo
+const consultaRuta = async (req, res = response) => {
+  // console.log(req.params.id);
+  // console.log(typeof req.params.id);
+  //  mongoose.Types.ObjectId(filterId),
+  try {
+    const rutas = await Ruta.find({ tipo: Types.ObjectId(req.params.id) });
+    console.log(rutas);
+    console.log(rutas==[]);
+
+    if (!rutas || rutas.length==0) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron Rutas guardadas",
+      });
+    }
+    res.json({
+      ok: true,
+      rutas,
+    });
+  } catch (error) {
+    if (error) {
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+      });
+    }
+  }
+};
+
+//desplegar aplicaciones-ruta
+//TODO arreglar para que responda con todo el objeto no solo con los idss
+const consultaApp_rutas = async (req, res = response) => {
+  try {
+    const app_ruta = await App_Ruta.find();
+    if (!app_ruta) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron aplicaciones con rutas",
+      });
+    }
+
+    await app_ruta.forEach(async (resApp) => {
+      await resApp.id_urls.forEach(async (resENV) => {
+        const rrr3 = await resultadosConsulta(Ruta, resENV.id);
+        console.log("ENVIROMENT--> ", rrr3[0].nombre);
+      });
+      const rrr = await resultadosConsulta(App, resApp.id_APP.valueOf());
+      console.log("APLICACIONES: ", rrr[0].nombre);
+    });
+
+    await res.json({
+      ok: true,
+      app_ruta,
+    });
+  } catch (error) {
+    if (error) {
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+      });
+    }
+  }
+};
+
+let resultadosConsulta = async (esquema, id) => {
+  return (aplicaciones = await esquema.find({
+    _id: Types.ObjectId(id),
+  }));
+};
+
+const consultaApp_rutaID = async (req, res = response) => {
+  console.log(req.params.id);
+  try {
+    const app_ruta = await App_Ruta.find({
+      id_APP: Types.ObjectId(req.params.id),
+    });
+    if (!app_ruta) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron Rutas guardadas",
+      });
+    }
+    let urls = [];
+    console.log("IDAPP->", app_ruta[0].id_APP.valueOf());
+    const nombreApp = await App.find({
+      _id: Types.ObjectId(app_ruta[0].id_APP.valueOf()),
+    });
+    console.log(nombreApp[0].nombre);
+    for (let item of app_ruta[0].id_urls) {
+      const url = await Ruta.find({ _id: Types.ObjectId(item.id) });
+      urls.push({
+        nombre: url[0].nombre,
+        valor: url[0].valor,
+      });
+    }
+    res.json({
+      ok: true,
+      nombreAPP: nombreApp[0].nombre,
+      urls,
+    });
+  } catch (error) {
+    if (error) {
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+        error,
       });
     }
   }
@@ -154,4 +313,9 @@ module.exports = {
   nuevaApp_Ruta,
   consultaAPPs,
   consultaRutas,
+  nuevoPerfil_ruta,
+  consultaPerfil_rutas,
+  consultaRuta,
+  consultaApp_rutas,
+  consultaApp_rutaID,
 };

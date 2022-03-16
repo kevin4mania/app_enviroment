@@ -16,6 +16,11 @@ const {
   nuevaApp_Ruta,
   consultaAPPs,
   consultaRutas,
+  nuevoPerfil_ruta,
+  consultaPerfil_rutas,
+  consultaRuta,
+  consultaApp_rutas,
+  consultaApp_rutaID
 } = require("../controllers/controlsEnviroments");
 
 const router = Router();
@@ -67,6 +72,16 @@ router.post(
   ],
   nuevaAPP
 );
+
+router.post(
+  "/nuevoPeril_ruta",
+  [
+    check("nombre", "el nombre del perfil ruta es obligatorio").not().isEmpty(),
+    validarCampos,
+  ],
+  nuevoPerfil_ruta
+);
+
 /**
  * RELACION APP-RUTA
  */
@@ -84,5 +99,9 @@ router.post(
  */
 router.get("/getAPPs", consultaAPPs);
 router.get("/getRutas", consultaRutas);
+router.get("/getPerfil_Rutas", consultaPerfil_rutas);
+router.get("/getRuta/:id", consultaRuta);
+router.get("/getApp_rutas", consultaApp_rutas);
+router.get("/getApp_rutaID/:id", consultaApp_rutaID);
 
 module.exports = router;
