@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const Usuario = require("../models/usuarios");
 const { generarJWT } = require("../helpers/jwt");
 
+
 const saludo = (req = response, res = response) => {
   res.json({
     ok: true,

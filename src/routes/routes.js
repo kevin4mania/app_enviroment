@@ -20,7 +20,8 @@ const {
   consultaPerfil_rutas,
   consultaRuta,
   consultaApp_rutas,
-  consultaApp_rutaID
+  consultaApp_rutaID,
+  consultaApp_rutaID_TIPO
 } = require("../controllers/controlsEnviroments");
 
 const router = Router();
@@ -28,7 +29,6 @@ const router = Router();
 /**
  * USUARIO
  */
-router.get("/saludo", saludo);
 router.post(
   "/nuevoUsuario",
   [
@@ -60,35 +60,35 @@ router.post(
     validarCampos,
   ],
   nuevaENV
-);
+  );
 
 router.post(
   "/nuevaApp",
   [
     check("nombre", "el nombre de la aplicacion es obligatorio")
-      .not()
-      .isEmpty(),
+    .not()
+    .isEmpty(),
     validarCampos,
   ],
   nuevaAPP
-);
+  );
 
-router.post(
-  "/nuevoPeril_ruta",
-  [
-    check("nombre", "el nombre del perfil ruta es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
+  router.post(
+    "/nuevoPeril_ruta",
+    [
+      check("nombre", "el nombre del perfil ruta es obligatorio").not().isEmpty(),
+      validarCampos,
+    ],
   nuevoPerfil_ruta
-);
-
-/**
- * RELACION APP-RUTA
- */
-router.post(
-  "/nuevaApp_Ruta",
-  [
-    check("id_APP", "el id de la app es obligatorio").not().isEmpty(),
+  );
+  
+  /**
+   * RELACION APP-RUTA
+   */
+  router.post(
+    "/nuevaApp_Ruta",
+    [
+      check("id_APP", "el id de la app es obligatorio").not().isEmpty(),
     check("id_urls", "el id de las URLs es obligatorio").not().isEmpty(),
   ],
   nuevaApp_Ruta
@@ -97,11 +97,13 @@ router.post(
 /**
  * Consultas
  */
+//router.get("/saludo", saludo);
 router.get("/getAPPs", consultaAPPs);
 router.get("/getRutas", consultaRutas);
 router.get("/getPerfil_Rutas", consultaPerfil_rutas);
 router.get("/getRuta/:id", consultaRuta);
 router.get("/getApp_rutas", consultaApp_rutas);
 router.get("/getApp_rutaID/:id", consultaApp_rutaID);
+router.get("/getApp_ruta_ID_TIPO/:id/:tipo", consultaApp_rutaID_TIPO);
 
 module.exports = router;
