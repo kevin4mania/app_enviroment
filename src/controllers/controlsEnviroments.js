@@ -227,7 +227,7 @@ const consultaRuta = async (req, res = response) => {
 /**
  * 1.posible solucion cambiar el (forEach) por el (for of)
  * 2.Probar como lo de app-ruta por idApp y idTipo con el (if continue)
- * 
+ *
  */
 const consultaApp_rutas = async (req, res = response) => {
   try {
@@ -336,6 +336,7 @@ const obtener_ruta_tipo = async (vecRutas, tipo) => {
   return urls;
 };
 */
+//**Se podria borrar ya esta mejorado en el ("consultaApp_rutaID_TIPOS") */
 const consultaApp_rutaID_TIPO = async (req, res = response) => {
   const { id, tipo } = req.params;
   // console.log("ID-> ", id);
@@ -385,6 +386,59 @@ const consultaApp_rutaID_TIPO = async (req, res = response) => {
   }
 };
 
+//Busqueda de apliacion filtranado la app con id y varios tipos de env (igual con id)
+const consultaApp_rutaID_TIPOS = async (req, res = response) => {
+  try {
+    const { id_APP, id_tipos } = req.body;
+    let vector_objectID = [];
+    id_tipos.forEach((e) => {
+      vector_objectID.push(Types.ObjectId(e));
+    });
+    // console.log("Ector de consulta--> ", vector_objectID);    
+    const app_ruta = await App_Ruta.find({
+      id_APP: Types.ObjectId(id_APP),
+    });
+    if (!app_ruta || app_ruta.length == 0) {
+      return res.status(404).json({
+        ok: false,
+        msg: "No se encontraron Rutas guardadas",
+      });
+    }
+    const nombreApp = await App.find({
+      _id: Types.ObjectId(app_ruta[0].id_APP.valueOf()),
+    });
+    //console.log(nombreApp[0].nombre);
+    let urls = [];
+    for (let item of app_ruta[0].id_urls) {
+      const url = await Ruta.find({
+        _id: Types.ObjectId(item.id),
+        // tipo: Types.ObjectId(tipo),
+        tipo:{$in:vector_objectID}
+      });
+      if (!url || url.length == 0) {
+        continue;
+      }
+      urls.push({
+        nombre: url[0].nombre,
+        valor: url[0].valor,
+      });
+    }    
+    res.json({
+      ok: true,
+      nombreAPP: nombreApp[0].nombre,
+      urls,
+    });
+  } catch (error) {
+    if (error) {
+      res.status(500).json({
+        ok: false,
+        msg: "Hable con el administrador",
+        error,
+      });
+    }
+  }
+};
+
 module.exports = {
   nuevaENV,
   nuevaAPP,
@@ -397,4 +451,5 @@ module.exports = {
   consultaApp_rutas,
   consultaApp_rutaID,
   consultaApp_rutaID_TIPO,
+  consultaApp_rutaID_TIPOS,
 };
